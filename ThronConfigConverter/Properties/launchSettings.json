@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ThronConfigConverter": {
+      "commandName": "Project",
+      "commandLineArgs": "E:\\temp\\Throne\\config\\profiles\\"
+    }
+  }
+}
