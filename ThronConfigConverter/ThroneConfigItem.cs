@@ -61,9 +61,18 @@ namespace ThronConfigConverter
         public int mux { get; set; }
         public string name { get; set; }
 
+        public string pre_shared_key { get; set; }
+        public string private_key { get; set; }
+        public string public_key { get; set; }
+        public int? persistent_keepalive {  get; set; }
+        public int[]? reserved { get; set; }
+        public string[] local_address { get; set; }
         public string sni { get; set; }
         public string path { get; set; }
 
+        public bool? use_system_proxy { get; set; }
+
+        public int? worker_count { get; set; }
         public string obfs { get; set; }
         public string obfsPassword { get; set; }
         public string pass { get; set; }

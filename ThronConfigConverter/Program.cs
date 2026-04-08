@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
+using System.Web;
 using ThronConfigConverter;
 
 
@@ -7,6 +8,7 @@ using ThronConfigConverter;
 // protocols info
 // https://github.com/throneproj/Throne/issues/1270
 // https://deepwiki.com/aiboboxx/v2rayfree/4.3-vmess-protocol
+
 
 Console.WriteLine("Converter form old Throne profile configuration json files to text format files\r\nfor import to new version of Throne");
 
@@ -24,6 +26,9 @@ StringBuilder vmessOut = new StringBuilder();
 StringBuilder vlessOut = new StringBuilder();
 StringBuilder trojanOut = new StringBuilder();
 StringBuilder hysteria2Out= new StringBuilder();
+StringBuilder wgOut = new StringBuilder();
+
+int shadowSockRecs=0, vmessRecs=0, vlessRecs=0, trojanRecs=0, hysteria2Recs=0, wgRecs=0 ;
 
 foreach (string fl in files)
 {
@@ -37,10 +42,7 @@ foreach (string fl in files)
             {
                 Console.WriteLine($"file: {fl}");
                 if (convItem.type == "shadowsocks")
-                {
-
-
-                   
+                {                                 
 
 
                     var ssObj = new SSObject()
@@ -56,8 +58,9 @@ foreach (string fl in files)
 
 
                     shadowSockOut.AppendLine(ssObj.ToString());
+                    shadowSockRecs++;
 
-                   
+
 
                 } else if (convItem.type == "vmess")
                 {
@@ -80,10 +83,9 @@ foreach (string fl in files)
                         fp= convItem.bean.stream.utls,
 
                     };
-
-
-
                     vmessOut.AppendLine(vmessObj.ToString());
+                    vmessRecs++;
+
                 } else if (convItem.type == "trojan")
                 {
 
@@ -113,7 +115,7 @@ foreach (string fl in files)
                     }
 
                     trojanOut.AppendLine(tro_str + "#" + convItem.bean.name);
-
+                    trojanRecs++;
 
                 } else if (convItem.type == "hysteria2") {
                     string hs2 = $"hysteria2://{convItem.bean.pass}@{convItem.bean.addr}:{convItem.bean.port}";
@@ -123,19 +125,19 @@ foreach (string fl in files)
                     }
                     if (!string.IsNullOrEmpty(convItem.bean.obfs))
                     {
-                        hs2 += $"&obfs={convItem.bean.obfs}";
+                        hs2 += $"&obfs={HttpUtility.UrlEncode(convItem.bean.obfs)}";
                     }
 
                     if (!string.IsNullOrEmpty(convItem.bean.obfsPassword))
                     {
-                        hs2 += $"&obfs-password={convItem.bean.obfsPassword}";
+                        hs2 += $"&obfs-password={HttpUtility.UrlEncode(convItem.bean.obfsPassword)}";
                     }
                     if (!string.IsNullOrEmpty(convItem.bean.sni))
                     {
-                        hs2 += $"&sni={convItem.bean.sni}";
+                        hs2 += $"&sni={HttpUtility.UrlEncode(convItem.bean.sni)}";
                     }
                     hysteria2Out.AppendLine(hs2 + "#" + convItem.bean.name);
-
+                    hysteria2Recs++;
                 }
                 else if (convItem.type == "vless")
                 {
@@ -182,14 +184,44 @@ foreach (string fl in files)
                         vl += $"&alpn={convItem.bean.stream.alpn}";
                     }
                     vlessOut.AppendLine(vl + "#" + convItem.bean.name);
+                    vlessRecs++;
                 }
                 else if (convItem.type == "wireguard")
                 {
-                    Console.WriteLine($"wireguard not supported");
+                    string vg = $"wg://{convItem.bean.addr}:{convItem.bean.port}?";
+                    vg += $"private_key={convItem.bean.private_key}";
+                    vg += $"&public_key={convItem.bean.public_key}";
+                    if (convItem.bean.persistent_keepalive != null && convItem.bean.persistent_keepalive > 0)
+                    {
+                        vg += $"&persistent_keepalive_interval={convItem.bean.persistent_keepalive}";
+                    }
+
+                    if (!string.IsNullOrEmpty(convItem.bean.pre_shared_key))
+                    {
+                        vg += $"&pre_shared_key={convItem.bean.pre_shared_key}";
+                    }
+                    if (convItem.bean.local_address != null)
+                    {                        
+                        vg += $"&local_address={string.Join("-", convItem.bean.local_address)}";
+                    }
+                    if (convItem.bean.reserved != null)
+                    {
+                        vg += $"&reserved={string.Join("-", convItem.bean.reserved.Select(m=>m.ToString()))}";
+                    }
+                    if (convItem.bean.worker_count!=null && convItem.bean.worker_count > 0)
+                    {
+                        vg += $"&workers={convItem.bean.worker_count}";
+                    }
+                    if (convItem.bean.use_system_proxy != null && convItem.bean.use_system_proxy==true)
+                    {
+                        vg += $"&use_system_interface=true";
+                    }
+                    wgOut.AppendLine(vg + "#" + convItem.bean.name);
+                    wgRecs++;
                 }
                 else
                 {
-                    Console.WriteLine($"STRANGE: {convItem.type}");
+                    Console.WriteLine($"Warning! Usupported type: {convItem.type}");
                 }
             }
 
@@ -209,12 +241,37 @@ foreach (string fl in files)
     }
 
 }
-
-File.WriteAllText("shadowsocks.txt", shadowSockOut.ToString());
-File.WriteAllText("vmess.txt", vmessOut.ToString());
-File.WriteAllText("trojan.txt", trojanOut.ToString());
-File.WriteAllText("hysteria2.txt", hysteria2Out.ToString());
-File.WriteAllText("vless.txt", vlessOut.ToString());
+Console.WriteLine();
+if (shadowSockOut.Length > 0)
+{
+    Console.WriteLine($"shadowsocks.txt - {shadowSockRecs} records.");
+    File.WriteAllText("shadowsocks.txt", shadowSockOut.ToString());
+}
+if (vmessOut.Length > 0)
+{
+    Console.WriteLine($"vmess.txt - {vmessRecs} records.");
+    File.WriteAllText("vmess.txt", vmessOut.ToString());
+}
+if (trojanOut.Length > 0)
+{
+    Console.WriteLine($"trojan.txt - {trojanRecs} records.");
+    File.WriteAllText("trojan.txt", trojanOut.ToString());
+}
+if (hysteria2Out.Length > 0)
+{
+    Console.WriteLine($"hysteria2.txt - {hysteria2Recs} records.");
+    File.WriteAllText("hysteria2.txt", hysteria2Out.ToString());
+}
+if (vlessOut.Length > 0)
+{
+    Console.WriteLine($"vless.txt - {vlessRecs} records.");
+    File.WriteAllText("vless.txt", vlessOut.ToString());
+}
+if (wgOut.Length > 0)
+{
+    Console.WriteLine($"wireguard.txt - {wgRecs} records.");
+    File.WriteAllText("wireguard.txt", wgOut.ToString());
+}
 Console.WriteLine("Complete, all files was created...");
 
 
