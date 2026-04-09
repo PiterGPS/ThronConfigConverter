@@ -7,26 +7,7 @@ using System.Threading.Tasks;
 
 namespace ThronConfigConverter
 {
-    //public class ThroneConfigItem
-    //{
-    //    public SubInstance bean { get; set; }
-
-    //    [JsonPropertyName("type")]
-    //    public string DocType { get; set; }
-    //    public string ul { get; set; }
-    //    public int yc { get; set; }
-
-    //}
-
-    //public class SubInstance
-    //{
-    //    public string addr { get; set; }
-    //    public int brutal_speed { get; set; }
-
-    //    public string method { get; set; }
-
-    //}
-
+ 
 
 
 
