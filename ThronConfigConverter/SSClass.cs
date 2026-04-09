@@ -26,9 +26,7 @@ namespace ThronConfigConverter
         public string name { get; set; }
 
         public override string ToString()
-        {
-            //string jsonstr = JsonSerializer.Serialize(this);
-            //var byteArray = Encoding.UTF8.GetBytes(jsonstr);
+        {            
 
             string ret_string = method + ":" + password;           
             var byteArray = Encoding.UTF8.GetBytes(ret_string);
