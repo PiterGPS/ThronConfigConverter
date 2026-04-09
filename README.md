@@ -7,6 +7,6 @@ This will create files for subsequent import into the new version of Throne 1.1.
 
 For run this project need use NET8.0
 
-**Supported profile types**: shadowsocks, vmess, vless, trojan, hysteria2
+**Supported profile types**: shadowsocks, vmess, vless, trojan, hysteria2, wireguard
 
 Example: ThronConfigConverter.exe c:\Throne\config\profiles\
